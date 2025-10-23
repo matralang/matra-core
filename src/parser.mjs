@@ -233,6 +233,10 @@ function peg$parse(input, options) {
     return { tag, properties: {}, children: [] }
   }
   function peg$f2(tag, args) {
+    const syntaxMode = options.syntaxMode || 'mixed';
+    if (syntaxMode === 'document') {
+      error('Function syntax is not allowed in document mode');
+    }
     let props = null, body = []
     if (args?.length) {
       if (args[0]?.__kind === "bare-object") {
@@ -282,6 +286,10 @@ function peg$parse(input, options) {
     }
   }
   function peg$f12(tagName, classList, id, setRuleArr, body) {
+    const syntaxMode = options.syntaxMode || 'mixed';
+    if (syntaxMode === 'application') {
+      error('Block syntax is not allowed in application mode');
+    }
     return {
       type: "element",
       tagName,

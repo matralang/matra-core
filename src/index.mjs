@@ -22,10 +22,18 @@ export { MATRA_VERSION } from "./types.mjs"
  * @param {boolean} [opts.minify] - Minify output
  * @param {string} [opts.grammarSource] - Source name for error messages
  * @param {Record<string, any>} [opts.context] - Template context for variable interpolation
+ * @param {'mixed'|'document'|'application'} [opts.mode='mixed'] - Syntax mode
+ *   - 'mixed': Both Block and Function syntax (default, backward compatible)
+ *   - 'document': Block syntax only (Pug-style with .class, #id, [attr])
+ *   - 'application': Function syntax only (JSX-style)
  * @returns {string} HTML string
  */
 export function compile(source, opts = {}) {
-  let ast = parse(source, { grammarSource: opts.grammarSource })
+  const mode = opts.mode ?? 'mixed'
+  let ast = parse(source, { 
+    grammarSource: opts.grammarSource,
+    syntaxMode: mode
+  })
   if (opts.context) {
     ast = transform(ast, opts.context)
   }
@@ -66,11 +74,19 @@ export function with_(context) {
  * @param {boolean} [options.minify] - Minify output (for HTML)
  * @param {string} [options.grammarSource] - Source name for error messages
  * @param {Record<string, any>} [options.context] - Template context
+ * @param {'mixed'|'document'|'application'} [options.mode='mixed'] - Syntax mode
+ *   - 'mixed': Both Block and Function syntax (default)
+ *   - 'document': Block syntax only (Pug-style)
+ *   - 'application': Function syntax only (JSX-style)
  * @returns {string|Object|Array} Rendered output in specified format
  */
 export function matra(input, options = {}) {
   const output = options.output ?? "html"
-  let ast = parse(input, { grammarSource: options.grammarSource })
+  const mode = options.mode ?? "mixed"
+  let ast = parse(input, { 
+    grammarSource: options.grammarSource,
+    syntaxMode: mode
+  })
   
   if (options.context) {
     ast = transform(ast, options.context)

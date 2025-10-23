@@ -2,6 +2,11 @@
 // ==========================
 //
 // Accepts expressions like "p`Hello, world!`" and computes their value.
+//
+// Syntax Modes:
+// - 'mixed' (default): Both Block and Function syntax
+// - 'document': Block syntax only (Pug-style with .class, #id, [attr])
+// - 'application': Function syntax only (JSX-style)
 
 Package
   = docType:"<!DOCTYPE html>"? _ block:Block _ { return block }
@@ -22,6 +27,10 @@ Tag
 
 TagApply
   = tag:Identifier _ "(" _ args:ArgList? _ ")" {
+      const syntaxMode = options.syntaxMode || 'mixed';
+      if (syntaxMode === 'document') {
+        error('Function syntax is not allowed in document mode');
+      }
       let props = null, body = []
       if (args?.length) {
         if (args[0]?.__kind === "bare-object") {
@@ -98,6 +107,10 @@ TagBody
     }
   }
   / _ tagName:Slug classList:("." @Slug)* id:("#" @Slug)? setRuleArr:("[" @SetRule+ "]")? _ body:Body? {
+    const syntaxMode = options.syntaxMode || 'mixed';
+    if (syntaxMode === 'application') {
+      error('Block syntax is not allowed in application mode');
+    }
     return {
       type: "element",
       tagName,

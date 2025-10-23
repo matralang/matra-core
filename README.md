@@ -7,7 +7,8 @@
 
 ## ✨ Features
 
-- � **Two Syntax Styles** - Block syntax (CSS-like) or Function syntax (JSX-like) - **NEW in v0.8!**
+- 🎨 **Two Syntax Styles** - Block syntax (CSS-like) or Function syntax (JSX-like) - **NEW in v0.8!**
+- 🔒 **Syntax Modes** - Enforce consistent syntax across your project - **NEW in v0.8!**
 - 🎯 **Simple & Expressive** - Choose the style that fits your needs
 - 🔀 **Conditional Rendering** - `m-if`, `m-else` directives (both tag and attribute styles)
 - 🔁 **Array Iteration** - `m-each` directive with scoped variables
@@ -30,7 +31,7 @@ compile('div({class:"container"}, h1("Hello"))')
 // Both produce: <div class="container"><h1>Hello</h1></div>
 ```
 
-See [Function Syntax Guide](./docs/function-syntax.md) | [Quick Reference](./docs/QUICK-REFERENCE.md) | [Syntax Comparison](./docs/SYNTAX-COMPARISON.md)
+See [Function Syntax Guide](./docs/function-syntax.md) | [Syntax Modes](./docs/syntax-modes.md) | [Quick Reference](./docs/QUICK-REFERENCE.md) | [Syntax Comparison](./docs/SYNTAX-COMPARISON.md)
 
 ## 📦 Installation
 
@@ -232,6 +233,10 @@ const html = compile('div { "{{msg}}" }', {
 - `options.context` (object) - Template variables
 - `options.minify` (boolean) - Minify HTML output
 - `options.grammarSource` (string) - Source name for error messages
+- `options.mode` (`'mixed'|'document'|'application'`) - Syntax mode (default: `'mixed'`)
+  - `'mixed'`: Both Block and Function syntax allowed (default)
+  - `'document'`: Block syntax only (Pug-style with `.class`, `#id`, `[attr]`)
+  - `'application'`: Function syntax only (JSX-style)
 
 **Returns:** HTML string
 
