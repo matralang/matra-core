@@ -39,7 +39,22 @@ export function compile(source, opts = {}) {
  * @returns {Function} Template function
  */
 export function with_(context) {
-  return (source) => compile(source, { context })
+  return (source, ...values) => {
+    // Support both plain string and template literal
+    let templateSource
+    if (typeof source === 'string') {
+      // Plain string
+      templateSource = source
+    } else if (Array.isArray(source) && 'raw' in source) {
+      // Template literal (TemplateStringsArray)
+      templateSource = source.reduce((acc, str, i) => {
+        return acc + str + (values[i] !== undefined ? String(values[i]) : '')
+      }, '')
+    } else {
+      throw new TypeError('with_() requires a string or template literal')
+    }
+    return compile(templateSource, { context })
+  }
 }
 
 /**

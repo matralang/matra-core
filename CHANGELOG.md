@@ -1,63 +1,73 @@
-# Changelog - @butchi/matra-core
+# Changelog
 
-## [0.6.0] - 2025-10-23
+All notable changes to @butchi/matra-core will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.7.0] - 2025-10-23
 
 ### Added
+- **Attribute-based directives** support in `transform()`:
+  - `m-if="condition"` - Conditional rendering on regular elements
+  - `m-each="items" m-as="item"` - Array iteration on regular elements
+  - `m-else` attribute - Alternative content when `m-if` is falsy
+  - Fully compatible with jp-butchi's existing template syntax
 
--   ✨ **Parser**: Peggy-based Matra syntax parser (`src/parser.mjs`)
--   ✨ **Type System**: Comprehensive type definitions for Matra & Matradown AST (`src/types.mjs`)
--   ✨ **Render Module**: HTML/JSON output generators (`src/render.mjs`)
--   ✨ **Compile API**: One-step parse-and-render function
--   📚 **JSDoc**: Full JSDoc type annotations for IDE support
+### Changed
+- `transformWithScopes()` completely rewritten to prioritize attribute directives over tag directives
+- `transform()` now correctly handles single node inputs (returns null when filtered out)
+- `toHTML()` enhanced with HAST/MDAST node type support
 
-### Core Features
+### Fixed
+- Attribute-based directives now work correctly with `m-else` siblings
+- Empty results from falsy `m-if` conditions are now properly handled
+- Scope management for nested `m-each` iterations
 
--   **parse(source, opts)**: Parse Matra source code to AST
--   **toHTML(ast, opts)**: Render AST to HTML string
--   **toJSON(ast, opts)**: Serialize AST to JSON
--   **compile(source, opts)**: Parse and render in one step
+## [0.6.0] - 2025-10-22
 
-### Infrastructure
+### Added
+- Template transformation engine (`transform.mjs`)
+  - Tag-based directives: `m-if[test="..."]`, `m-each[of="..." as="..."]`, `m-else`
+  - Mustache variable interpolation: `{{variable}}`, `{{object.property}}`
+  - Scope management for nested iterations
+- `with_(context)` helper function for creating reusable template functions
+- `compile()` now accepts `opts.context` for template evaluation
 
--   🔗 npm link support for local development
--   🏗️ Build system with Peggy grammar compilation
--   ✅ Integrated with jp-butchi website project
+### Changed
+- API expanded with `transform`, `with_()` exports
+- `matra()` unified API now supports context parameter
 
-### Migration from jp-butchi
+## [0.5.0] - 2025-10-21
 
-Migrated production-tested implementations:
+### Added
+- Multiple output formats:
+  - `toTeX()` - LaTeX output
+  - `toESTree()` - ESTree AST (stub)
+  - `toCanvas()` - Canvas rendering (stub)
+- `evaluate.mjs` and `evaluator.mjs` modules
 
--   Matra syntax parser (matra-script-parser.peggy)
--   HTML rendering logic
--   Type definitions from Matradown
+## [0.4.0] - 2025-10-20
 
-### Breaking Changes
+### Added
+- Initial ESM module structure
+- Peggy parser integration (`parser.mjs` generated from `matra.pegjs`)
+- Basic rendering: `toHTML()`, `toJSON()`
+- Type definitions (`types.mjs`)
 
--   None (initial stable release)
+## [0.3.0] - 2025-10-19
 
-### Next Steps
+### Added
+- Core parser functionality
+- HAST-compatible AST structure
 
--   [ ] Template evaluation (m-if, m-each, {{mustache}})
--   [ ] Matradown bridge (Markdown → Matra AST)
--   [ ] Plugin system
--   [ ] TypeScript type definitions (.d.ts)
+## [0.2.0] - 2025-10-18
 
----
+### Added
+- Project initialization
+- Basic package configuration
 
-## Development
+## [0.1.0] - 2025-10-17
 
-Built and tested with:
-
--   Node.js v22.14.0
--   Peggy parser generator
--   ESM modules
-
-## Integration
-
-Used in production by:
-
--   **jp-butchi** (IWABUCHI Yuki Official Website)
-
----
-
-© 2025 Yuki Iwabuchi / MIT License
+### Added
+- Initial repository setup

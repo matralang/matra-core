@@ -85,190 +85,229 @@ function nextElementSibling(list, idx) {
  * @returns {any[]}
  */
 function transformWithScopes(nodeList, scopes) {
+  if (!Array.isArray(nodeList)) return []
+
   const out = []
-
   for (let i = 0; i < nodeList.length; i++) {
-    const n = nodeList[i]
+    const node = nodeList[i]
 
-    // Text node: interpolate variables
-    if (n?.type === 'text') {
-      out.push({
-        type: 'text',
-        value: interpolateString(scopes, n.value)
-      })
+    // Text node - interpolate {{mustache}}
+    if (node.type === "text") {
+      const interpolated = interpolateString(scopes, node.value || "")
+      out.push({ type: "text", value: interpolated })
       continue
     }
 
     // Element node
-    if (n?.type === 'element') {
-      const el = n
-      const tag = el.tagName
-      const props = el.properties || {}
+    if (node.type === "element") {
+      const props = node.properties || {}
 
-      // Handle m-if attribute
-      if (props['m-if']) {
-        const testPath = String(props['m-if'])
+      // ==== ATTRIBUTE-BASED DIRECTIVES (higher priority) ====
+
+      // m-if attribute
+      if (props["m-if"] != null) {
+        const testPath = String(props["m-if"])
         const truthy = !!getByPath(scopes, testPath)
-        const nextInfo = nextElementSibling(nodeList, i)
 
         if (truthy) {
-          // Remove m-if and process normally
-          const cloned = cloneNode(el)
-          if (cloned.properties) delete cloned.properties['m-if']
-          out.push(...transformWithScopes([cloned], scopes))
-
-          // Skip next if it's m-else
-          if (nextInfo) {
-            const nextProps = nextInfo.el.properties || {}
-            if (nextInfo.el.tagName === 'm-else' || nextProps['m-else']) {
-              i = nextInfo.index
-            }
+          // Remove m-if and process
+          const cloned = {
+            ...node,
+            properties: { ...props },
+            children: node.children ? [...node.children] : [],
           }
-        } else {
-          // falsy: process m-else if present
-          if (nextInfo) {
-            const nextEl = nextInfo.el
-            const nextProps = nextEl.properties || {}
-            if (nextEl.tagName === 'm-else' || nextProps['m-else']) {
-              const clonedElse = cloneNode(nextEl)
-              if (clonedElse.properties) delete clonedElse.properties['m-else']
-              out.push(...transformWithScopes([clonedElse], scopes))
-              i = nextInfo.index
-            }
-          }
-        }
-        continue
-      }
+          delete cloned.properties["m-if"]
+          const processed = transformWithScopes([cloned], scopes)
+          out.push(...processed)
 
-      // Handle m-each attribute
-      const eachKey = props['m-each'] || props['m-of']
-      if (eachKey) {
-        const ofPath = String(eachKey)
-        const asName = String(props['m-as'] || 'item')
-        const indexName = String(props['m-index'] || 'index')
-        const items = getByPath(scopes, ofPath)
-
-        if (Array.isArray(items)) {
-          for (let idx = 0; idx < items.length; idx++) {
-            const item = items[idx]
-            const frame = { [asName]: item, index: idx }
-            if (indexName !== 'index') frame[indexName] = idx
-
-            // Clone base element without control attributes
-            const baseEl = cloneNode(el)
-            if (baseEl.properties) {
-              delete baseEl.properties['m-each']
-              delete baseEl.properties['m-of']
-              delete baseEl.properties['m-as']
-              delete baseEl.properties['m-index']
-            }
-
-            // Build instance with interpolated properties
-            const inst = {
-              type: 'element',
-              tagName: baseEl.tagName,
-              properties: {},
-              children: []
-            }
-
-            if (baseEl.properties) {
-              const newProps = {}
-              for (const [k, v] of Object.entries(baseEl.properties)) {
-                if (typeof v === 'string') {
-                  newProps[k] = interpolateString([...scopes, frame], v)
-                } else if (Array.isArray(v)) {
-                  newProps[k] = v.map(x =>
-                    typeof x === 'string' ? interpolateString([...scopes, frame], x) : x
-                  )
-                } else {
-                  newProps[k] = v
-                }
+          // Check if next is m-else and skip it
+          if (i + 1 < nodeList.length) {
+            const nextNode = nodeList[i + 1]
+            if (nextNode.type === "element") {
+              const nextProps = nextNode.properties || {}
+              if (
+                nextNode.tagName === "m-else" ||
+                nextProps["m-else"] != null
+              ) {
+                i++ // consume m-else
               }
-              inst.properties = newProps
             }
-
-            inst.children = transformWithScopes(
-              (baseEl.children || []).map(cloneNode),
-              [...scopes, frame]
-            )
-            out.push(inst)
-          }
-        }
-        continue
-      }
-
-      // Handle m-if tag
-      if (tag === 'm-if') {
-        const testPath = String(props.test || '')
-        const truthy = !!getByPath(scopes, testPath)
-        const nextInfo = nextElementSibling(nodeList, i)
-
-        if (truthy) {
-          out.push(...transformWithScopes(el.children || [], scopes))
-          if (nextInfo && nextInfo.el.tagName === 'm-else') {
-            i = nextInfo.index
           }
         } else {
-          if (nextInfo && nextInfo.el.tagName === 'm-else') {
-            out.push(...transformWithScopes(nextInfo.el.children || [], scopes))
-            i = nextInfo.index
+          // Check for m-else
+          if (i + 1 < nodeList.length) {
+            const nextNode = nodeList[i + 1]
+            if (nextNode.type === "element") {
+              const nextProps = nextNode.properties || {}
+              
+              // m-else tag: expand children
+              if (nextNode.tagName === "m-else") {
+                i++ // consume m-else
+                const processed = transformWithScopes(nextNode.children || [], scopes)
+                out.push(...processed)
+                continue
+              }
+              
+              // m-else attribute: expand element without attribute
+              if (nextProps["m-else"] != null) {
+                i++ // consume m-else
+                const cloned = {
+                  ...nextNode,
+                  properties: { ...nextProps },
+                  children: nextNode.children ? [...nextNode.children] : [],
+                }
+                delete cloned.properties["m-else"]
+                const processed = transformWithScopes([cloned], scopes)
+                out.push(...processed)
+                continue
+              }
+            }
+          }
+          // No m-else found, just skip this m-if node
+        }
+        continue
+      }
+
+      // m-each attribute (also m-of)
+      const eachKey = props["m-each"] || props["m-of"]
+      if (eachKey != null) {
+        const ofPath = String(eachKey)
+        const asName = String(props["m-as"] || "item")
+        const indexName = String(props["m-index"] || "index")
+        const items = getByPath(scopes, ofPath)
+
+        if (Array.isArray(items)) {
+          const baseNode = {
+            ...node,
+            properties: { ...props },
+            children: node.children ? [...node.children] : [],
+          }
+          // Remove m-* attributes
+          delete baseNode.properties["m-each"]
+          delete baseNode.properties["m-of"]
+          delete baseNode.properties["m-as"]
+          delete baseNode.properties["m-index"]
+
+          for (let idx = 0; idx < items.length; idx++) {
+            const item = items[idx]
+            const frame = {
+              [asName]: item,
+              index: idx,
+            }
+            if (indexName && indexName !== "index") {
+              frame[indexName] = idx
+            }
+
+            // Process with new scope
+            const newScopes = [frame, ...scopes]
+            const processed = transformWithScopes([baseNode], newScopes)
+            out.push(...processed)
           }
         }
         continue
       }
 
-      // Handle m-else tag (skip if not consumed by m-if)
-      if (tag === 'm-else') {
+      // ==== TAG-BASED DIRECTIVES ====
+
+      const tagName = node.tagName
+
+      // m-if tag
+      if (tagName === "m-if") {
+        const testPath = String(props.test || "")
+        const truthy = !!getByPath(scopes, testPath)
+
+        if (truthy) {
+          const processed = transformWithScopes(node.children || [], scopes)
+          out.push(...processed)
+
+          // Skip next m-else if exists
+          if (i + 1 < nodeList.length) {
+            const nextNode = nodeList[i + 1]
+            if (nextNode.type === "element" && nextNode.tagName === "m-else") {
+              i++
+            }
+          }
+        } else {
+          // Check for m-else tag
+          if (i + 1 < nodeList.length) {
+            const nextNode = nodeList[i + 1]
+            if (nextNode.type === "element" && nextNode.tagName === "m-else") {
+              i++
+              const processed = transformWithScopes(nextNode.children || [], scopes)
+              out.push(...processed)
+            }
+          }
+        }
         continue
       }
 
-      // Handle m-each tag
-      if (tag === 'm-each') {
-        const ofPath = String(props.of || '')
-        const asName = String(props.as || 'item')
+      // m-else tag (should be consumed by m-if)
+      if (tagName === "m-else") {
+        continue
+      }
+
+      // m-each tag
+      if (tagName === "m-each") {
+        const ofPath = String(props.of || props.each || "")
+        const asName = String(props.as || "item")
+        const indexName = String(props.index || "index")
         const items = getByPath(scopes, ofPath)
 
         if (Array.isArray(items)) {
           for (let idx = 0; idx < items.length; idx++) {
             const item = items[idx]
-            const frame = { [asName]: item, index: idx }
-            out.push(...transformWithScopes((el.children || []).map(cloneNode), [...scopes, frame]))
+            const frame = {
+              [asName]: item,
+              index: idx,
+            }
+            if (indexName && indexName !== "index") {
+              frame[indexName] = idx
+            }
+
+            const newScopes = [frame, ...scopes]
+            const processed = transformWithScopes(node.children || [], scopes)
+            out.push(...processed)
           }
         }
         continue
       }
 
-      // Normal element: interpolate properties and recurse
-      const nextEl = {
-        type: 'element',
-        tagName: tag,
+      // ==== REGULAR ELEMENT ====
+      const newNode = {
+        type: "element",
+        tagName: node.tagName,
         properties: {},
-        children: []
+        children: [],
       }
 
-      if (el.properties) {
-        const newProps = {}
-        for (const [k, v] of Object.entries(el.properties)) {
-          if (typeof v === 'string') {
-            newProps[k] = interpolateString(scopes, v)
-          } else if (Array.isArray(v)) {
-            newProps[k] = v.map(x =>
-              typeof x === 'string' ? interpolateString(scopes, x) : x
-            )
+      // Interpolate properties
+      if (props) {
+        for (const [key, val] of Object.entries(props)) {
+          if (val == null) continue
+          if (typeof val === "string") {
+            newNode.properties[key] = interpolateString(scopes, val)
           } else {
-            newProps[k] = v
+            newNode.properties[key] = val
           }
         }
-        nextEl.properties = newProps
       }
 
-      nextEl.children = transformWithScopes(el.children || [], scopes)
-      out.push(nextEl)
+      // Process children
+      newNode.children = transformWithScopes(node.children || [], scopes)
+
+      out.push(newNode)
       continue
     }
 
-    // Other node types: pass through
-    out.push(n)
+    // Root or unknown node
+    if (node.type === "root") {
+      const processed = transformWithScopes(node.children || [], scopes)
+      out.push(...processed)
+      continue
+    }
+
+    // Fallback: pass through
+    out.push(node)
   }
 
   return out
@@ -281,18 +320,20 @@ function transformWithScopes(nodeList, scopes) {
  * @returns {import('./types.mjs').MatraNode}
  */
 export function transform(ast, context = {}) {
+  if (ast == null) return ast
+
+  // Wrap single node in array for uniform processing
+  const nodeList = Array.isArray(ast) ? ast : [ast]
   const scopes = [context]
 
-  if (ast.type === 'root') {
-    return {
-      type: 'root',
-      children: transformWithScopes(ast.children || [], scopes)
-    }
+  const transformed = transformWithScopes(nodeList, scopes)
+
+  // If input was single node, return single node (or empty if filtered out)
+  if (!Array.isArray(ast)) {
+    return transformed.length > 0 ? transformed[0] : null
   }
 
-  // Single element or other node
-  const result = transformWithScopes([ast], scopes)
-  return result[0] || ast
+  return transformed
 }
 
 export default { transform }
