@@ -1,168 +1,373 @@
-# Matra Language Core
+# @butchi/matra-core
 
-> **Unified language for document, data, and code representation**
+[![Version](https://img.shields.io/badge/version-0.7.0-blue.svg)](https://github.com/butchi/matra-core)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D22-green.svg)](https://nodejs.org/)
-[![Language](https://img.shields.io/badge/lang-Peggy%2FESM-orange.svg)](https://peggyjs.org/)
+**Matra** is a lightweight, expressive template language and engine for generating HTML, with support for conditional rendering, loops, and variable interpolation.
 
----
+## ✨ Features
 
-## 🧭 概要 / Overview
+- 🎯 **Simple Syntax** - CSS-like selector syntax for HTML generation
+- 🔀 **Conditional Rendering** - `m-if`, `m-else` directives (both tag and attribute styles)
+- 🔁 **Array Iteration** - `m-each` directive with scoped variables
+- 📝 **Variable Interpolation** - `{{mustache}}` style templates
+- 🏷️ **Two Directive Styles** - Tag-based (`m-if[test="..."]`) and attribute-based (`div[m-if="..."]`)
+- 🌳 **HAST Compatible** - Works with unified ecosystem
+- 📦 **Zero Dependencies** - Pure ESM module
 
-**Matra** は、文書・データ・プログラムを単一の構造体系で表現するための新しいメタ言語です。
-Markdown・HTML・JSON・JavaScript（ESTree）を統合的に扱い、
-「構造そのものを操作する」ことを目的としています。
-
----
-
-### 🔶 キーコンセプト
-
-| 項目         | 内容                                                          |
-| ------------ | ------------------------------------------------------------- |
-| **中間形式** | Matrast (`[tag, props, body]`)                                |
-| **パーサ**   | Peggy (`.pegjs`) で実装                                       |
-| **評価系**   | `evaluate()` により構文木を実行可能                           |
-| **出力系**   | `toHTML()`, `toJSON()`, `toCanvas()`, `toTeX()`, `toESTree()` |
-| **哲学**     | 「構造＝意味」を統合する構造的ラーニング言語                  |
-
----
-
-## 🚀 セットアップ / Setup
-
-### 1. 依存関係のインストール
+## 📦 Installation
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/matra-lang.git
-cd matra-lang
-npm install
+npm install @butchi/matra-core
 ```
 
-### 2. パーサのビルド
+## 🚀 Quick Start
 
-```bash
-npm run build
+### Basic Usage
+
+```javascript
+import { compile } from '@butchi/matra-core'
+
+const html = compile('div.greeting { h1 { "Hello, World!" } }')
+console.log(html)
+// Output: <div class="greeting"><h1>Hello, World!</h1></div>
 ```
 
-> `src/matra.pegjs` → `src/parser.mjs` が自動生成されます。
+### With Template Variables
 
-### 3. テスト実行
+```javascript
+import { compile } from '@butchi/matra-core'
 
-```bash
-npm test
+const template = 'div { h1 { "Hello, {{name}}!" } p { "Age: {{age}}" } }'
+const html = compile(template, { 
+  context: { name: 'Butchi', age: 30 } 
+})
+console.log(html)
+// Output: <div><h1>Hello, Butchi!</h1><p>Age: 30</p></div>
 ```
 
----
+### Using `with_()` for Reusable Templates
 
-## 💡 使用例 / Examples
+```javascript
+import { with_ } from '@butchi/matra-core'
 
-### 例 1：Matra 構文 → HTML
+// Create a template function
+const tmpl = with_({ items: ['Apple', 'Banana', 'Cherry'] })
+
+// Use with template literal syntax
+const html = tmpl`
+  ul.fruits {
+    li[m-each="items" m-as="item"] { "{{item}}" }
+  }
+`
+console.log(html)
+// Output: <ul class="fruits"><li>Apple</li><li>Banana</li><li>Cherry</li></ul>
+```
+
+## 📖 Syntax Guide
+
+### Elements and Classes
 
 ```matra
-div {
-  h1 { "Matra Render Test" }
-  p { "Matra v0.5 rendering to HTML works correctly." }
-  code[fileType=text] { "console.log('Hello Matra!')" }
-}
+div.container { h1#title { "Hello" } }
 ```
-
-→ 出力：
-
+↓
 ```html
-<div>
-  <h1>Matra Render Test</h1>
-  <p>Matra v0.5 rendering to HTML works correctly.</p>
-  <pre><code class="lang-text">console.log(&#039;Hello Matra!&#039;)</code></pre>
-</div>
+<div class="container"><h1 id="title">Hello</h1></div>
 ```
 
----
-
-### 例 2：toCanvas() で描画命令生成
+### Attributes
 
 ```matra
-div {
-  text { "Canvas Example" }
-  circle[x=100,y=100,r=30,color="red"]
-  text[x=90,y=180,color="blue"] { "Matra!" }
+a[href="/home" target="_blank"] { "Go Home" }
+```
+↓
+```html
+<a href="/home" target="_blank">Go Home</a>
+```
+
+### Conditional Rendering (Attribute Style)
+
+```javascript
+const html = compile('div[m-if="isActive"] { "Active" }', { 
+  context: { isActive: true } 
+})
+// Output: <div>Active</div>
+```
+
+```javascript
+const html = compile('div[m-if="isActive"] { "Active" }', { 
+  context: { isActive: false } 
+})
+// Output: (empty)
+```
+
+### Conditional with `m-else`
+
+```javascript
+const template = `
+  div {
+    p[m-if="isLoggedIn"] { "Welcome back!" }
+    m-else { p { "Please login" } }
+  }
+`
+const html = compile(template, { context: { isLoggedIn: false } })
+// Output: <div><p>Please login</p></div>
+```
+
+### Array Iteration
+
+```javascript
+const template = `
+  ul.todos {
+    li[m-each="items" m-as="item"] {
+      "{{item.title}}: {{item.done}}"
+    }
+  }
+`
+const html = compile(template, { 
+  context: { 
+    items: [
+      { title: 'Task 1', done: true },
+      { title: 'Task 2', done: false }
+    ]
+  } 
+})
+// Output:
+// <ul class="todos">
+//   <li>Task 1: true</li>
+//   <li>Task 2: false</li>
+// </ul>
+```
+
+### Nested Properties
+
+```javascript
+const template = 'div { h1 { "{{user.profile.name}}" } }'
+const html = compile(template, { 
+  context: { 
+    user: { 
+      profile: { name: 'Butchi' } 
+    } 
+  } 
+})
+// Output: <div><h1>Butchi</h1></div>
+```
+
+## 📚 API Reference
+
+### `parse(source, options?)`
+
+Parse Matra source code into AST.
+
+```javascript
+import { parse } from '@butchi/matra-core'
+
+const ast = parse('div { "Hello" }')
+```
+
+**Parameters:**
+- `source` (string) - Matra source code
+- `options.grammarSource` (string) - Source name for error messages
+
+**Returns:** AST object
+
+### `compile(source, options?)`
+
+Parse, transform (with context), and render to HTML.
+
+```javascript
+import { compile } from '@butchi/matra-core'
+
+const html = compile('div { "{{msg}}" }', { 
+  context: { msg: 'Hello' } 
+})
+```
+
+**Parameters:**
+- `source` (string) - Matra source code
+- `options.context` (object) - Template variables
+- `options.minify` (boolean) - Minify HTML output
+- `options.grammarSource` (string) - Source name for error messages
+
+**Returns:** HTML string
+
+### `transform(ast, context)`
+
+Apply template transformations (directives, interpolation) to AST.
+
+```javascript
+import { parse, transform, toHTML } from '@butchi/matra-core'
+
+const ast = parse('div[m-if="show"] { "Visible" }')
+const transformed = transform(ast, { show: true })
+const html = toHTML(transformed)
+```
+
+**Parameters:**
+- `ast` (object) - AST from `parse()`
+- `context` (object) - Template variables
+
+**Returns:** Transformed AST
+
+### `with_(context)`
+
+Create a reusable template function with context.
+
+```javascript
+import { with_ } from '@butchi/matra-core'
+
+const tmpl = with_({ name: 'World' })
+
+// Both syntaxes work:
+const html1 = tmpl('div { "Hello, {{name}}!" }')
+const html2 = tmpl`div { "Hello, {{name}}!" }`
+```
+
+**Parameters:**
+- `context` (object) - Template variables
+
+**Returns:** Function that accepts template source (string or template literal)
+
+### `toHTML(ast, options?)`
+
+Render AST to HTML string.
+
+```javascript
+import { parse, toHTML } from '@butchi/matra-core'
+
+const ast = parse('div { "Hello" }')
+const html = toHTML(ast)
+```
+
+**Parameters:**
+- `ast` (object) - AST object
+- `options.minify` (boolean) - Minify HTML output
+
+**Returns:** HTML string
+
+### `toJSON(ast, options?)`
+
+Serialize AST to JSON string.
+
+```javascript
+import { parse, toJSON } from '@butchi/matra-core'
+
+const ast = parse('div { "Hello" }')
+const json = toJSON(ast, { indent: 2 })
+```
+
+**Parameters:**
+- `ast` (object) - AST object
+- `options.indent` (number) - JSON indentation
+
+**Returns:** JSON string
+
+## 🎭 Directive Styles
+
+Matra supports two styles for directives:
+
+### Tag-Based (v0.6+)
+
+```matra
+m-if[test="condition"] {
+  div { "Content" }
 }
 ```
 
-→ 出力：
+### Attribute-Based (v0.7+)
 
-```json
-[
-  { "op": "circle", "x": 100, "y": 100, "r": 30, "color": "red" },
-  { "op": "text", "x": 90, "y": 180, "text": "Matra!", "color": "blue" }
-]
+```matra
+div[m-if="condition"] { "Content" }
 ```
 
-ブラウザでの描画例：
-[`examples/canvas.html`](examples/canvas.html)
+Both styles work identically. Attribute-based style is more concise when wrapping a single element.
 
----
+## 🔧 Advanced Usage
 
-## 🧩 モジュール構成 / Modules
+### Multiple Directives
 
+```javascript
+const template = `
+  section.products {
+    div[m-each="products" m-as="product"] {
+      h3 { "{{product.name}}" }
+      p[m-if="product.inStock"] { "In Stock" }
+      m-else { p { "Out of Stock" } }
+      span.price { "${{product.price}}" }
+    }
+  }
+`
+
+const html = compile(template, {
+  context: {
+    products: [
+      { name: 'Apple', price: 1.2, inStock: true },
+      { name: 'Banana', price: 0.8, inStock: false }
+    ]
+  }
+})
 ```
-src/
- ├── parser.mjs        # 自動生成PEGパーサ
- ├── evaluate.mjs      # AST評価系
- ├── render.mjs        # HTML / Canvas / TeX / ESTree 出力
- └── matra.pegjs       # 文法定義
-examples/
- ├── basic.matra
- ├── canvas.matra
- └── canvas.html
-tests/
- ├── syntax.test.mjs
- ├── eval.test.mjs
- └── render.test.mjs
+
+### Index in Loops
+
+The `index` variable is automatically available in `m-each`:
+
+```javascript
+const template = `
+  ol {
+    li[m-each="items" m-as="item"] { "Item {{index}}: {{item}}" }
+  }
+`
+
+const html = compile(template, { 
+  context: { items: ['A', 'B', 'C'] } 
+})
+// Output:
+// <ol>
+//   <li>Item 0: A</li>
+//   <li>Item 1: B</li>
+//   <li>Item 2: C</li>
+// </ol>
 ```
 
----
+## 🧪 Testing
 
-## 🧠 設計思想 / Philosophy
+```bash
+# Run basic parser test
+node test-matra-core.mjs
 
-> すべての表現は「構造」であり、構造は変換可能である。
-> Matra は、文書・データ・コードの垣根を超えた「構造的思考の共通言語」である。
+# Run template features test
+node test-matra-template.mjs
 
-Matra の設計は、スクウェア（現スクウェア・エニックス）の RPG シリーズに登場する青魔法
-**「マトラマジック（Matra Magic）」** の理念 “Learning” に由来する。
-異なる言語体系を「学習し取り込み再構築する」構造を体現している。
+# Run attribute directives test
+node test-matra-attr-directive.mjs
+node test-matra-attr-transform.mjs
+```
 
----
+## 📝 Changelog
 
-## 🧾 白書 / White Paper
+See [CHANGELOG.md](./CHANGELOG.md) for version history.
 
-📘 [Matra Language White Paper v0.6 (日本語版)](./docs/matra-whitepaper-v0.6.md)
-本書は、理念・文法・評価・描画仕様を包括的にまとめた公式文書です。
-PDF 版・英語版も順次公開予定。
+## 🤝 Contributing
 
----
+Contributions are welcome! Please feel free to submit issues or pull requests.
 
-## 🧱 ライセンス / License
+## 📄 License
 
-MIT License
-© 2025 Yuki Iwabuchi / Matra Language Design Team
+MIT © butchi
 
----
+## 🔗 Related Projects
 
-## ✨ 次フェーズ / Next
+- [jp-butchi](https://github.com/butchi/jp-butchi) - Personal website built with Matra (130+ pages)
+- [MatraMagica](https://github.com/butchi/matra-magica) - Canvas-based visual rendering (upcoming)
 
-- [ ] Self-hosting Matra (Matra で Matra を書く)
-- [ ] toSVG / toThree / toMusicXML 出力
-- [ ] Web IDE 実装 (Matra Playground)
-- [ ] 国際仕様（Matra International Specification）
+## 💡 Examples
 
----
-
-## 🌐 コミュニティ / Community
-
-- GitHub Issues — 提案・議論
-- Discussions — 構文・哲学・拡張提案
-- Discord — コラボレーション（準備中）
+More examples can be found in:
+- [test-matra-template.mjs](./test-matra-template.mjs) - Template features
+- [test-work-card-template.mjs](./test-work-card-template.mjs) - Real-world component example
 
 ---
 
-> Matra is not just a language — it’s a structure that learns.
+Made with ❤️ by [butchi](https://butchi.jp)
