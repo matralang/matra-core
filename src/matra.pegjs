@@ -7,7 +7,8 @@ Package
   = docType:"<!DOCTYPE html>"? _ block:Block _ { return block }
 
 Block
-  = TagBody
+  = TagApply
+  / TagBody
   / Tag
   / SetRule
   / HtmlElement
@@ -18,6 +19,76 @@ Tag
   = _ tag:Slug _ {
     return { tag, properties: {}, children: [] }
   }
+
+TagApply
+  = tag:Identifier _ "(" _ args:ArgList? _ ")" {
+      let props = null, body = []
+      if (args?.length) {
+        if (args[0]?.__kind === "bare-object") {
+          props = args[0].value
+          body = args.slice(1)
+        } else {
+          body = args
+        }
+      }
+      return {
+        type: "element",
+        tagName: tag,
+        properties: props || {},
+        children: body.map(v =>
+          typeof v === "string"
+            ? { type: "text", value: v }
+            : v
+        )
+      }
+    }
+
+ArgList
+  = head:Arg tail:(_ "," _ Arg)* { return [head, ...tail.map(t => t[3])] }
+
+Arg
+  = BareObject
+  / TagApply
+  / StringLiteral
+  / Number
+  / Boolean
+  / Identifier
+
+BareObject
+  = "{" _ pairs:(BarePair (_ "," _ BarePair)*)? _ "}" {
+      if (!pairs) return { __kind:"bare-object", value:{} }
+      const xs = [pairs[0], ...(pairs[1] ? pairs[1].map(t => t[3]) : [])]
+      return { __kind:"bare-object", value:Object.fromEntries(xs) }
+    }
+
+BarePair
+  = key:(Identifier / StringLiteral) _ ":" _ val:(StringLiteral / Number / Boolean / Identifier) {
+      const k = typeof key === "string" ? key.replace(/^\"|\"$/g, "") : key
+      const v = typeof val === "string" && val.startsWith('"') ? val.slice(1, -1) : val
+      return [k, v]
+    }
+
+StringLiteral
+  = "\"" str:([^\"]*) "\"" {
+    return str.join("")
+  }
+
+Number
+  = digits:[0-9]+ ("." [0-9]+)? {
+    return parseFloat(text())
+  }
+
+Boolean
+  = "true" { return true }
+  / "false" { return false }
+
+Identifier
+  = !ReservedWord first:[a-zA-Z_] rest:[a-zA-Z0-9_\-]* {
+    return first + rest.join("")
+  }
+
+ReservedWord
+  = ("true" / "false") ![a-zA-Z0-9_\-]
 
 TagBody
   = "$root" _ body:Body? {

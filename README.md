@@ -1,19 +1,36 @@
 # @butchi/matra-core
 
-[![Version](https://img.shields.io/badge/version-0.7.0-blue.svg)](https://github.com/butchi/matra-core)
+[![Version](https://img.shields.io/badge/version-0.8.0-blue.svg)](https://github.com/butchi/matra-core)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
 
 **Matra** is a lightweight, expressive template language and engine for generating HTML, with support for conditional rendering, loops, and variable interpolation.
 
 ## ✨ Features
 
-- 🎯 **Simple Syntax** - CSS-like selector syntax for HTML generation
+- � **Two Syntax Styles** - Block syntax (CSS-like) or Function syntax (JSX-like) - **NEW in v0.8!**
+- 🎯 **Simple & Expressive** - Choose the style that fits your needs
 - 🔀 **Conditional Rendering** - `m-if`, `m-else` directives (both tag and attribute styles)
 - 🔁 **Array Iteration** - `m-each` directive with scoped variables
 - 📝 **Variable Interpolation** - `{{mustache}}` style templates
 - 🏷️ **Two Directive Styles** - Tag-based (`m-if[test="..."]`) and attribute-based (`div[m-if="..."]`)
 - 🌳 **HAST Compatible** - Works with unified ecosystem
 - 📦 **Zero Dependencies** - Pure ESM module
+
+## 🆕 New in v0.8: Function Syntax
+
+Choose between **block syntax** (CSS-like) or **function syntax** (JSX-like):
+
+```javascript
+// Block syntax (v0.7)
+compile('div.container { h1 { "Hello" } }')
+
+// Function syntax (v0.8) - NEW!
+compile('div({class:"container"}, h1("Hello"))')
+
+// Both produce: <div class="container"><h1>Hello</h1></div>
+```
+
+See [Function Syntax Guide](./docs/function-syntax.md) | [Quick Reference](./docs/QUICK-REFERENCE.md) | [Syntax Comparison](./docs/SYNTAX-COMPARISON.md)
 
 ## 📦 Installation
 
@@ -23,12 +40,22 @@ npm install @butchi/matra-core
 
 ## 🚀 Quick Start
 
-### Basic Usage
+### Basic Usage (Block Syntax)
 
 ```javascript
-import { compile } from '@butchi/matra-core'
+import { compile } from "@butchi/matra-core"
 
 const html = compile('div.greeting { h1 { "Hello, World!" } }')
+console.log(html)
+// Output: <div class="greeting"><h1>Hello, World!</h1></div>
+```
+
+### Basic Usage (Function Syntax) - NEW in v0.8
+
+```javascript
+import { compile } from "@butchi/matra-core"
+
+const html = compile('div({class:"greeting"}, h1("Hello, World!"))')
 console.log(html)
 // Output: <div class="greeting"><h1>Hello, World!</h1></div>
 ```
@@ -36,11 +63,11 @@ console.log(html)
 ### With Template Variables
 
 ```javascript
-import { compile } from '@butchi/matra-core'
+import { compile } from "@butchi/matra-core"
 
 const template = 'div { h1 { "Hello, {{name}}!" } p { "Age: {{age}}" } }'
-const html = compile(template, { 
-  context: { name: 'Butchi', age: 30 } 
+const html = compile(template, {
+  context: { name: "Butchi", age: 30 },
 })
 console.log(html)
 // Output: <div><h1>Hello, Butchi!</h1><p>Age: 30</p></div>
@@ -49,10 +76,10 @@ console.log(html)
 ### Using `with_()` for Reusable Templates
 
 ```javascript
-import { with_ } from '@butchi/matra-core'
+import { with_ } from "@butchi/matra-core"
 
 // Create a template function
-const tmpl = with_({ items: ['Apple', 'Banana', 'Cherry'] })
+const tmpl = with_({ items: ["Apple", "Banana", "Cherry"] })
 
 // Use with template literal syntax
 const html = tmpl`
@@ -66,22 +93,36 @@ console.log(html)
 
 ## 📖 Syntax Guide
 
-### Elements and Classes
+Matra v0.8 supports two equivalent syntax styles:
+
+### Block Syntax (CSS-like)
 
 ```matra
 div.container { h1#title { "Hello" } }
 ```
-↓
+
+### Function Syntax (JSX-like)
+
+```matra
+div({class:"container"}, h1({id:"title"}, "Hello"))
+```
+
+### Both produce:
+
 ```html
 <div class="container"><h1 id="title">Hello</h1></div>
 ```
+
+**Choose the style you prefer!** See [Syntax Comparison](./docs/SYNTAX-COMPARISON.md) for detailed examples.
 
 ### Attributes
 
 ```matra
 a[href="/home" target="_blank"] { "Go Home" }
 ```
+
 ↓
+
 ```html
 <a href="/home" target="_blank">Go Home</a>
 ```
@@ -89,15 +130,15 @@ a[href="/home" target="_blank"] { "Go Home" }
 ### Conditional Rendering (Attribute Style)
 
 ```javascript
-const html = compile('div[m-if="isActive"] { "Active" }', { 
-  context: { isActive: true } 
+const html = compile('div[m-if="isActive"] { "Active" }', {
+  context: { isActive: true },
 })
 // Output: <div>Active</div>
 ```
 
 ```javascript
-const html = compile('div[m-if="isActive"] { "Active" }', { 
-  context: { isActive: false } 
+const html = compile('div[m-if="isActive"] { "Active" }', {
+  context: { isActive: false },
 })
 // Output: (empty)
 ```
@@ -125,13 +166,13 @@ const template = `
     }
   }
 `
-const html = compile(template, { 
-  context: { 
+const html = compile(template, {
+  context: {
     items: [
-      { title: 'Task 1', done: true },
-      { title: 'Task 2', done: false }
-    ]
-  } 
+      { title: "Task 1", done: true },
+      { title: "Task 2", done: false },
+    ],
+  },
 })
 // Output:
 // <ul class="todos">
@@ -144,12 +185,12 @@ const html = compile(template, {
 
 ```javascript
 const template = 'div { h1 { "{{user.profile.name}}" } }'
-const html = compile(template, { 
-  context: { 
-    user: { 
-      profile: { name: 'Butchi' } 
-    } 
-  } 
+const html = compile(template, {
+  context: {
+    user: {
+      profile: { name: "Butchi" },
+    },
+  },
 })
 // Output: <div><h1>Butchi</h1></div>
 ```
@@ -161,12 +202,13 @@ const html = compile(template, {
 Parse Matra source code into AST.
 
 ```javascript
-import { parse } from '@butchi/matra-core'
+import { parse } from "@butchi/matra-core"
 
 const ast = parse('div { "Hello" }')
 ```
 
 **Parameters:**
+
 - `source` (string) - Matra source code
 - `options.grammarSource` (string) - Source name for error messages
 
@@ -177,14 +219,15 @@ const ast = parse('div { "Hello" }')
 Parse, transform (with context), and render to HTML.
 
 ```javascript
-import { compile } from '@butchi/matra-core'
+import { compile } from "@butchi/matra-core"
 
-const html = compile('div { "{{msg}}" }', { 
-  context: { msg: 'Hello' } 
+const html = compile('div { "{{msg}}" }', {
+  context: { msg: "Hello" },
 })
 ```
 
 **Parameters:**
+
 - `source` (string) - Matra source code
 - `options.context` (object) - Template variables
 - `options.minify` (boolean) - Minify HTML output
@@ -197,7 +240,7 @@ const html = compile('div { "{{msg}}" }', {
 Apply template transformations (directives, interpolation) to AST.
 
 ```javascript
-import { parse, transform, toHTML } from '@butchi/matra-core'
+import { parse, transform, toHTML } from "@butchi/matra-core"
 
 const ast = parse('div[m-if="show"] { "Visible" }')
 const transformed = transform(ast, { show: true })
@@ -205,6 +248,7 @@ const html = toHTML(transformed)
 ```
 
 **Parameters:**
+
 - `ast` (object) - AST from `parse()`
 - `context` (object) - Template variables
 
@@ -215,9 +259,9 @@ const html = toHTML(transformed)
 Create a reusable template function with context.
 
 ```javascript
-import { with_ } from '@butchi/matra-core'
+import { with_ } from "@butchi/matra-core"
 
-const tmpl = with_({ name: 'World' })
+const tmpl = with_({ name: "World" })
 
 // Both syntaxes work:
 const html1 = tmpl('div { "Hello, {{name}}!" }')
@@ -225,6 +269,7 @@ const html2 = tmpl`div { "Hello, {{name}}!" }`
 ```
 
 **Parameters:**
+
 - `context` (object) - Template variables
 
 **Returns:** Function that accepts template source (string or template literal)
@@ -234,13 +279,14 @@ const html2 = tmpl`div { "Hello, {{name}}!" }`
 Render AST to HTML string.
 
 ```javascript
-import { parse, toHTML } from '@butchi/matra-core'
+import { parse, toHTML } from "@butchi/matra-core"
 
 const ast = parse('div { "Hello" }')
 const html = toHTML(ast)
 ```
 
 **Parameters:**
+
 - `ast` (object) - AST object
 - `options.minify` (boolean) - Minify HTML output
 
@@ -251,13 +297,14 @@ const html = toHTML(ast)
 Serialize AST to JSON string.
 
 ```javascript
-import { parse, toJSON } from '@butchi/matra-core'
+import { parse, toJSON } from "@butchi/matra-core"
 
 const ast = parse('div { "Hello" }')
 const json = toJSON(ast, { indent: 2 })
 ```
 
 **Parameters:**
+
 - `ast` (object) - AST object
 - `options.indent` (number) - JSON indentation
 
@@ -320,8 +367,8 @@ const template = `
   }
 `
 
-const html = compile(template, { 
-  context: { items: ['A', 'B', 'C'] } 
+const html = compile(template, {
+  context: { items: ["A", "B", "C"] },
 })
 // Output:
 // <ol>
@@ -365,6 +412,7 @@ MIT © butchi
 ## 💡 Examples
 
 More examples can be found in:
+
 - [test-matra-template.mjs](./test-matra-template.mjs) - Template features
 - [test-work-card-template.mjs](./test-work-card-template.mjs) - Real-world component example
 
