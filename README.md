@@ -7,8 +7,9 @@
 
 ## ✨ Features
 
-- 🎨 **Two Syntax Styles** - Block syntax (CSS-like) or Function syntax (JSX-like) - **NEW in v0.8!**
+- 🎨 **Three Syntax Styles** - Block, Function, and Backtick syntax - **NEW Backtick in v0.8!**
 - 🔒 **Syntax Modes** - Enforce consistent syntax across your project - **NEW in v0.8!**
+- ✨ **Concise Syntax** - `h1\`Hello\``instead of`h1 { "Hello" }` - **NEW in v0.8!**
 - 🎯 **Simple & Expressive** - Choose the style that fits your needs
 - 🔀 **Conditional Rendering** - `m-if`, `m-else` directives (both tag and attribute styles)
 - 🔁 **Array Iteration** - `m-each` directive with scoped variables
@@ -17,21 +18,26 @@
 - 🌳 **HAST Compatible** - Works with unified ecosystem
 - 📦 **Zero Dependencies** - Pure ESM module
 
-## 🆕 New in v0.8: Function Syntax
+## 🆕 New in v0.8: Multiple Syntax Styles
 
-Choose between **block syntax** (CSS-like) or **function syntax** (JSX-like):
+Choose between **block syntax**, **function syntax**, or **backtick syntax**:
 
 ```javascript
-// Block syntax (v0.7)
+// Block syntax with quotes (v0.7)
 compile('div.container { h1 { "Hello" } }')
 
-// Function syntax (v0.8) - NEW!
+// Backtick syntax - NEW & CONCISE! (v0.8)
+compile("div.container { h1`Hello` }")
+
+// Function syntax (v0.8)
 compile('div({class:"container"}, h1("Hello"))')
 
-// Both produce: <div class="container"><h1>Hello</h1></div>
+// All produce: <div class="container"><h1>Hello</h1></div>
 ```
 
-See [Function Syntax Guide](./docs/function-syntax.md) | [Syntax Modes](./docs/syntax-modes.md) | [Quick Reference](./docs/QUICK-REFERENCE.md) | [Syntax Comparison](./docs/SYNTAX-COMPARISON.md)
+The **backtick syntax** provides the cleanest way to write simple text content!
+
+See [Backtick Syntax Guide](./docs/backtick-syntax.md) | [Function Syntax Guide](./docs/function-syntax.md) | [Syntax Modes](./docs/syntax-modes.md) | [Quick Reference](./docs/QUICK-REFERENCE.md) | [Syntax Comparison](./docs/SYNTAX-COMPARISON.md)
 
 ## 📦 Installation
 
@@ -47,6 +53,16 @@ npm install @butchi/matra-core
 import { compile } from "@butchi/matra-core"
 
 const html = compile('div.greeting { h1 { "Hello, World!" } }')
+console.log(html)
+// Output: <div class="greeting"><h1>Hello, World!</h1></div>
+```
+
+### Basic Usage (Backtick Syntax) - NEW & CONCISE in v0.8
+
+```javascript
+import { compile } from "@butchi/matra-core"
+
+const html = compile("div.greeting { h1`Hello, World!` }")
 console.log(html)
 // Output: <div class="greeting"><h1>Hello, World!</h1></div>
 ```

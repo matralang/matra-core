@@ -106,11 +106,32 @@ TagBody
       children: body ?? [],
     }
   }
-  / _ tagName:Slug classList:("." @Slug)* id:("#" @Slug)? setRuleArr:("[" @SetRule+ "]")? _ body:Body? {
+  / _ tagName:Slug selectors:(ClassOrId)* setRuleArr:("[" @SetRule+ "]")? _ text:BacktickText {
     const syntaxMode = options.syntaxMode || 'mixed';
     if (syntaxMode === 'application') {
       error('Block syntax is not allowed in application mode');
     }
+    const classList = selectors.filter(s => s.type === 'class').map(s => s.value);
+    const id = selectors.find(s => s.type === 'id')?.value;
+    return {
+      type: "element",
+      tagName,
+      properties: Object.assign(
+        {},
+        setRuleArr ? Object.fromEntries(setRuleArr) : {},
+        id ? { id } : {},
+        classList.length > 0 ? { class: classList.join(" ") } : {}
+      ),
+      children: [{ type: "text", value: text }],
+    }
+  }
+  / _ tagName:Slug selectors:(ClassOrId)* setRuleArr:("[" @SetRule+ "]")? _ body:Body? {
+    const syntaxMode = options.syntaxMode || 'mixed';
+    if (syntaxMode === 'application') {
+      error('Block syntax is not allowed in application mode');
+    }
+    const classList = selectors.filter(s => s.type === 'class').map(s => s.value);
+    const id = selectors.find(s => s.type === 'id')?.value;
     return {
       type: "element",
       tagName,
@@ -123,6 +144,10 @@ TagBody
       children: body ?? [],
     }
   }
+
+ClassOrId
+  = "." value:Slug { return { type: "class", value } }
+  / "#" value:Slug { return { type: "id", value } }
 
 Body
   = "{" _ @Expression _ "}"
@@ -236,6 +261,11 @@ HtmlQuotedString
 
 String
   = "\"" str:[^\"]* "\"" {
+    return str.join("")
+  }
+
+BacktickText
+  = "`" str:([^`]*) "`" {
     return str.join("")
   }
 
