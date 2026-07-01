@@ -5,7 +5,7 @@
 ドメイン非依存なMatra ASTにHTMLのセマンティクスを与えるパッケージです。
 
 ```ts
-import { parse } from "@matralang/core"
+import { parse } from "@matra/core"
 import { toHTML } from "@matralang/matra-html"
 
 toHTML(parse('p("Hello", class="lead")'))

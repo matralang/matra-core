@@ -5,7 +5,7 @@
 HTML semantics for the domain-neutral Matra AST.
 
 ```ts
-import { parse } from "@matralang/core"
+import { parse } from "@matra/core"
 import { toHTML } from "@matralang/matra-html"
 
 toHTML(parse('p("Hello", class="lead")'))

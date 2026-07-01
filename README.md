@@ -29,7 +29,7 @@ The AST used by Core visitors, transformers, and renderers is object-shaped:
 Convert explicitly at the boundary:
 
 ```ts
-import { astToMatraJSON, matraJSONToAST } from "@matralang/core"
+import { astToMatraJSON, matraJSONToAST } from "@matra/core"
 ```
 
 ## Replaceable parsers
@@ -38,7 +38,7 @@ A parser only needs a `parse(source, options?)` method and may return either
 AST or MatraJSON. `parseWith()` normalizes both forms to AST.
 
 ```ts
-import { parseWith } from "@matralang/core"
+import { parseWith } from "@matra/core"
 
 const ast = parseWith(peggyParser, source)
 ```
@@ -51,7 +51,7 @@ adapts that output to AST, keeping the parser replaceable.
 HTML rendering is provided by the separate workspace package:
 
 ```ts
-import { parse } from "@matralang/core"
+import { parse } from "@matra/core"
 import { toHTML } from "@matralang/matra-html"
 
 toHTML(parse('p("Hello", class="lead")'))

@@ -1,6 +1,6 @@
 # Matra Documentation
 
-Welcome to the @matralang/core documentation!
+Welcome to the @matra/core documentation!
 
 ## Table of Contents
 
@@ -48,20 +48,20 @@ Welcome to the @matralang/core documentation!
 - [Main README](../README.md)
 - [CHANGELOG](../CHANGELOG.md)
 - [GitHub Repository](https://github.com/matralang/core)
-- [npm Package](https://www.npmjs.com/package/@matralang/core)
+- [npm Package](https://www.npmjs.com/package/@matra/core)
 
 ## Quick Start
 
 Install:
 
 ```bash
-npm install @matralang/core
+npm install @matra/core
 ```
 
 Basic usage:
 
 ```javascript
-import { compile } from '@matralang/core';
+import { compile } from '@matra/core';
 
 const template = `
   div {

@@ -1,6 +1,6 @@
 # Integration Guide
 
-Learn how to integrate @matralang/core into your project.
+Learn how to integrate @matra/core into your project.
 
 ## Table of Contents
 
@@ -25,19 +25,19 @@ Learn how to integrate @matralang/core into your project.
 Install via npm:
 
 ```bash
-npm install @matralang/core
+npm install @matra/core
 ```
 
 Or yarn:
 
 ```bash
-yarn add @matralang/core
+yarn add @matra/core
 ```
 
 Or pnpm:
 
 ```bash
-pnpm add @matralang/core
+pnpm add @matra/core
 ```
 
 ## Build Tools
@@ -47,7 +47,7 @@ pnpm add @matralang/core
 Use Matra directly in Node.js scripts:
 
 ```javascript
-import { compile } from '@matralang/core';
+import { compile } from '@matra/core';
 import { writeFileSync } from 'fs';
 
 const template = `
@@ -74,7 +74,7 @@ Create a Vite plugin for Matra templates:
 **vite-plugin-matra.js:**
 
 ```javascript
-import { compile } from '@matralang/core';
+import { compile } from '@matra/core';
 
 export default function matraPlugin() {
   return {
@@ -119,7 +119,7 @@ Create a Webpack loader for Matra:
 **matra-loader.js:**
 
 ```javascript
-import { compile } from '@matralang/core';
+import { compile } from '@matra/core';
 
 export default function matraLoader(source) {
   const render = compile(source);
@@ -149,7 +149,7 @@ Use a Rollup plugin:
 **rollup-plugin-matra.js:**
 
 ```javascript
-import { compile } from '@matralang/core';
+import { compile } from '@matra/core';
 
 export default function matra() {
   return {
@@ -189,7 +189,7 @@ Use Matra as a view engine:
 
 ```javascript
 import express from 'express';
-import { compile } from '@matralang/core';
+import { compile } from '@matra/core';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -240,7 +240,7 @@ Use Matra with Fastify's view plugin:
 ```javascript
 import Fastify from 'fastify';
 import view from '@fastify/view';
-import { compile } from '@matralang/core';
+import { compile } from '@matra/core';
 
 const fastify = Fastify();
 
@@ -272,7 +272,7 @@ Use Matra with Koa:
 
 ```javascript
 import Koa from 'koa';
-import { compile } from '@matralang/core';
+import { compile } from '@matra/core';
 import { readFileSync } from 'fs';
 
 const app = new Koa();
@@ -301,7 +301,7 @@ Build a simple static site generator:
 **build.js:**
 
 ```javascript
-import { compile } from '@matralang/core';
+import { compile } from '@matra/core';
 import { readdirSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 
@@ -347,7 +347,7 @@ Create an 11ty template engine:
 **.eleventy.js:**
 
 ```javascript
-import { compile } from '@matralang/core';
+import { compile } from '@matra/core';
 
 export default function(eleventyConfig) {
   // Add Matra template engine
@@ -392,7 +392,7 @@ Use Matra with TypeScript:
 **types.d.ts:**
 
 ```typescript
-declare module '@matralang/core' {
+declare module '@matra/core' {
   export interface MatraNode {
     type: 'element' | 'text';
     tagName?: string;
@@ -426,7 +426,7 @@ declare module '@matralang/core' {
 **app.ts:**
 
 ```typescript
-import { compile, with_ } from '@matralang/core';
+import { compile, with_ } from '@matra/core';
 
 interface PageContext {
   title: string;

@@ -11,7 +11,7 @@ Conditionally render elements based on a truthy value.
 #### Attribute Style (v0.7+)
 
 ```javascript
-import { compile } from '@matralang/core'
+import { compile } from '@matra/core'
 
 const template = 'div[m-if="isActive"] { "Active" }'
 

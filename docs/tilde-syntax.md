@@ -133,7 +133,7 @@ form {
 - **Application Mode**: ❌ 使用不可 (Block 構文が禁止されているため)
 
 ```javascript
-import { matra } from "@matralang/core"
+import { matra } from "@matra/core"
 
 // Mixed/Document mode: OK
 matra("p~Text~") // ✅

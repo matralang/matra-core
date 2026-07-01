@@ -1,6 +1,6 @@
 # Examples
 
-Real-world examples demonstrating @matralang/core usage.
+Real-world examples demonstrating @matra/core usage.
 
 ## Table of Contents
 
@@ -18,7 +18,7 @@ Real-world examples demonstrating @matralang/core usage.
 A reusable blog post card component:
 
 ```javascript
-import { compile } from '@matralang/core';
+import { compile } from '@matra/core';
 
 const template = `
   article[class="post-card"] {
