@@ -47,7 +47,7 @@ Welcome to the @matra/core documentation!
 
 - [Main README](../README.md)
 - [CHANGELOG](../CHANGELOG.md)
-- [GitHub Repository](https://github.com/matralang/core)
+- [GitHub Repository](https://github.com/matralang/matra-core)
 - [npm Package](https://www.npmjs.com/package/@matra/core)
 
 ## Quick Start
