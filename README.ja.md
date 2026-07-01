@@ -2,7 +2,9 @@
 
 [English](./README.md) | [日本語](./README.ja.md)
 
-Matra Coreは、HTML、Math、Docs、Graphicsの各パッケージで共有する、小さくドメイン非依存な基盤です。ツリー表現、相互変換、走査、変換、交換可能なParser境界を定義します。レンダリングとドメイン固有の評価処理はCoreの外に配置します。
+Matra Coreは、HTML、Math、Docs、Graphicsの各パッケージで共有する、小さくドメイン非依存な基盤です。ツリー表現、相互変換、走査、変換、交換可能なParserとRendererの境界を定義します。ドメイン固有の評価処理と出力規則はCoreの外に配置します。
+
+ドメインパッケージは小さな`MatraRenderer`契約を実装し、`renderWith(renderer, ast, options)`で一貫して呼び出せます。Coreは境界だけを所有し、SVGやHTMLなどの出力規則は各パッケージに残します。
 
 ## 2つのツリー表現
 

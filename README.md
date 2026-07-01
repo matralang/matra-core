@@ -4,8 +4,12 @@
 
 Matra Core is the small, domain-neutral foundation shared by HTML, Math,
 Docs, and Graphics packages. It defines tree representations, conversion,
-traversal, transformation, and a replaceable parser boundary. Rendering and
-domain-specific evaluation live outside Core.
+traversal, transformation, and replaceable parser and renderer boundaries.
+Domain-specific evaluation and output rules live outside Core.
+
+Domain packages implement the small `MatraRenderer` contract and can be
+invoked consistently with `renderWith(renderer, ast, options)`. Core owns the
+boundary, while SVG, HTML, and other output rules remain in their packages.
 
 ## Two tree representations
 
