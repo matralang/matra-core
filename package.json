@@ -29,7 +29,10 @@
     "prepack": "npm run build"
   },
   "license": "MIT",
-  "repository": "https://github.com/matralang/core",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matralang/core.git"
+  },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },

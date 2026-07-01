@@ -1,7 +1,7 @@
 {
   "name": "@matralang/matra-html",
   "description": "HTML renderer for Matra AST",
-  "version": "0.9.0",
+  "version": "0.1.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -18,7 +18,7 @@
     "test": "npm run build && node --test"
   },
   "peerDependencies": {
-    "@matralang/core": "0.9.0"
+    "@matralang/core": "0.1.0"
   },
   "peerDependenciesMeta": {
     "@matralang/core": {
