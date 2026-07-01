@@ -36,4 +36,4 @@ export interface MatraParser<Output = MatraAST | MatraJSON> {
   parse(source: string, options?: ParseOptions): Output
 }
 
-export const MATRA_VERSION = "0.1.1"
+export const MATRA_VERSION = "0.2.0"
