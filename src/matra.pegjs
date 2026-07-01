@@ -9,20 +9,19 @@
 // - 'application': Function syntax only (JSX-style)
 
 Package
-  = docType:"<!DOCTYPE html>"? _ block:Block _ { return block }
+  = _ block:Block _ { return block }
 
 Block
   = TagApply
   / TagBody
   / Tag
   / SetRule
-  / HtmlElement
   / StringNode
   / CommentNode
 
 Tag
   = _ tag:Slug _ {
-    return { tag, properties: {}, children: [] }
+    return [tag, {}, []]
   }
 
 TagApply
@@ -40,20 +39,11 @@ TagApply
           body = args
         }
       }
-      return {
-        type: "element",
-        tagName: tag,
-        properties: props || {},
-        children: body.map(v =>
-          typeof v === "string"
-            ? { type: "text", value: v }
-            : v
-        )
-      }
+      return [tag, props || {}, body]
     }
 
 ArgList
-  = head:Arg tail:(_ "," _ Arg)* { return [head, ...tail.map(t => t[3])] }
+  = first:Arg rest:(_ "," _ Arg)* { return [first, ...rest.map(t => t[3])] }
 
 Arg
   = BareObject
@@ -101,10 +91,7 @@ ReservedWord
 
 TagBody
   = "$root" _ body:Body? {
-    return {
-      type: "root",
-      children: body ?? [],
-    }
+    return ["$root", {}, body ?? []]
   }
   / _ tagName:Slug selectors:(ClassOrId)* setRuleArr:("[" @SetRule+ "]")? _ text:TildeText {
     const syntaxMode = options.syntaxMode || 'mixed';
@@ -113,17 +100,16 @@ TagBody
     }
     const classList = selectors.filter(s => s.type === 'class').map(s => s.value);
     const id = selectors.find(s => s.type === 'id')?.value;
-    return {
-      type: "element",
+    return [
       tagName,
-      properties: Object.assign(
+      Object.assign(
         {},
         setRuleArr ? Object.fromEntries(setRuleArr) : {},
         id ? { id } : {},
         classList.length > 0 ? { class: classList.join(" ") } : {}
       ),
-      children: [{ type: "text", value: text }],
-    }
+      [text],
+    ]
   }
   / _ tagName:Slug selectors:(ClassOrId)* setRuleArr:("[" @SetRule+ "]")? _ text:BacktickText {
     const syntaxMode = options.syntaxMode || 'mixed';
@@ -132,17 +118,16 @@ TagBody
     }
     const classList = selectors.filter(s => s.type === 'class').map(s => s.value);
     const id = selectors.find(s => s.type === 'id')?.value;
-    return {
-      type: "element",
+    return [
       tagName,
-      properties: Object.assign(
+      Object.assign(
         {},
         setRuleArr ? Object.fromEntries(setRuleArr) : {},
         id ? { id } : {},
         classList.length > 0 ? { class: classList.join(" ") } : {}
       ),
-      children: [{ type: "text", value: text }],
-    }
+      [text],
+    ]
   }
   / _ tagName:Slug selectors:(ClassOrId)* setRuleArr:("[" @SetRule+ "]")? _ body:Body? {
     const syntaxMode = options.syntaxMode || 'mixed';
@@ -151,17 +136,16 @@ TagBody
     }
     const classList = selectors.filter(s => s.type === 'class').map(s => s.value);
     const id = selectors.find(s => s.type === 'id')?.value;
-    return {
-      type: "element",
+    return [
       tagName,
-      properties: Object.assign(
+      Object.assign(
         {},
         setRuleArr ? Object.fromEntries(setRuleArr) : {},
         id ? { id } : {},
         classList.length > 0 ? { class: classList.join(" ") } : {}
       ),
-      children: body ?? [],
-    }
+      body ?? [],
+    ]
   }
 
 ClassOrId
@@ -189,15 +173,12 @@ SetRule
 
 StringNode
   = "\"" str:([^\"]*) "\"" {
-    return { type: "text", value: str.join("") }
+    return str.join("")
   }
 
 CommentNode
   = "<!--" _ strMatch:((!("-->") .)*) _ "-->" {
-    return {
-      type: "comment",
-      value: strMatch.map(item => item[1]).join("")
-    }
+    return ["#comment", {}, [strMatch.map(item => item[1]).join("")]]
   }
 
 Template
@@ -206,76 +187,6 @@ Template
 Slug
   = str:[^\'\"\(\)\[\]\{\}\<\>\=\|\#\.\`\~\n]+ {
     return str.join("").trim()
-  }
-
-HtmlElement
-  = tagProp:HtmlTagOpen children:HtmlContent* HtmlTagClose _ {
-    return {
-      type: "element",
-      ...tagProp,
-      children,
-    }
-  }
-  / tagProp:HtmlTagSelfClose _ {
-    return {
-      type: "element",
-      ...tagProp,
-    }
-  }
-
-HtmlTagOpen
-  = "<" tagName:HtmlIdentifier _ prop:HtmlAttributes? ">" {
-    return {
-      tagName,
-      properties: prop ?? {},
-    }
-  }
-
-HtmlTagSelfClose
-  = "<" tagName:HtmlIdentifier _ prop:HtmlAttributes? "/>" {
-    return {
-      tagName,
-      properties: prop ?? {},
-    }
-  }
-
-HtmlTagClose
-  = "</" HtmlIdentifier ">"
-
-HtmlIdentifier
-  = str:([a-zA-Z0-9\-]+) {
-    return str.join("")
-  }
-
-HtmlAttributes
-  = attrArr:HtmlAttribute+ {
-    return Object.fromEntries(attrArr)
-  }
-
-HtmlAttribute
-  = key:HtmlIdentifier "=" val:HtmlQuotedString _ {
-    return [key, val]
-  }
-  / key:HtmlIdentifier {
-    return [key, true]
-  }
-
-HtmlContent = HtmlElement / HtmlText / HtmlComment
-
-HtmlText
-  = str:([^<]+) {
-    return {
-      type: "text",
-      value: str.join("")
-    }
-  }
-
-HtmlComment
-  = CommentNode
-
-HtmlQuotedString
-  = "\"" str:([^\"]*) "\"" {
-    return str.join("")
   }
 
 String
