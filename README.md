@@ -1,5 +1,7 @@
 # Matra Core
 
+[English](./README.md) | [日本語](./README.ja.md)
+
 Matra Core is the small, domain-neutral foundation shared by HTML, Math,
 Docs, and Graphics packages. It defines tree representations, conversion,
 traversal, transformation, and a replaceable parser boundary. Rendering and
@@ -53,3 +55,9 @@ import { toHTML } from "@butchi/matra-html"
 
 toHTML(parse('p({class:"lead"}, "Hello")'))
 ```
+
+## Documentation languages
+
+English documents use `name.md`; their Japanese counterparts use
+`name.ja.md`. Both versions should keep the same heading structure and code
+examples so changes are easy to synchronize.
