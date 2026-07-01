@@ -1,5 +1,5 @@
 import { isMatraAST, isMatraJSON, matraJSONToAST } from "./convert.js";
-import { parse as peggyParse } from "./parser.mjs";
+import { parse as peggyParse } from "./matra-parser.mjs";
 /** Parse source with the bundled Peggy implementation. */
 export function parse(source, options) {
     return normalizeParserOutput(peggyParse(source, options));
