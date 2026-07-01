@@ -1,4 +1,4 @@
-/** @matralang/core — domain-neutral Matra tree primitives. */
+/** @matra/core — domain-neutral Matra tree primitives. */
 
 export { parse, parseWith } from "./parse.js"
 export {

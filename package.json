@@ -1,5 +1,5 @@
 {
-  "name": "@matralang/core",
+  "name": "@matra/core",
   "description": "Domain-neutral AST, parser, visitor, and transformer for Matra",
   "version": "0.1.0",
   "type": "module",
@@ -34,7 +34,8 @@
     "url": "git+https://github.com/matralang/core.git"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   },
   "devDependencies": {
     "@types/node": "^22.20.0",
