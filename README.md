@@ -2,6 +2,10 @@
 
 This package has moved to the Matra monorepo:
 
+https://github.com/matralang/matra
+
+The npm package remains available under the `@matra/*` scope.
+
 ## Matra Core
 
 [English](./README.md) | [日本語](./README.ja.md)
