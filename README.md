@@ -1,4 +1,8 @@
-# Matra Core
+# Archived
+
+This package has moved to the Matra monorepo:
+
+## Matra Core
 
 [English](./README.md) | [日本語](./README.ja.md)
 
