@@ -1,4 +1,8 @@
-# Matra Core
+# Archived
+
+このリポジトリは Matra monorepo に統合されました。
+
+## Matra Core
 
 [English](./README.md) | [日本語](./README.ja.md)
 
